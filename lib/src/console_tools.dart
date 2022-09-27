@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:dart_console/dart_console.dart';
+import 'package:collection/collection.dart';
 
 final _console = Console();
 
 class ConsoleTools {
   final Coordinate _cursorOrigin = _console.cursorPosition!;
   List<String> _currentRender = [];
-  int get _currentRenderLineCount => _currentRender.length;
 
   ConsoleTools() {
     _saveCursorPosition();
@@ -23,7 +23,7 @@ class ConsoleTools {
 
   void clearRender() {
     _restoreCursorPosition();
-    for (var i = 0; i < _currentRenderLineCount; i++) {
+    for (var line in _currentRender) {
       _console.eraseLine();
       _console.cursorDown();
     }
@@ -36,10 +36,20 @@ class ConsoleTools {
   void showCursor() => _console.showCursor();
 
   void render(List<String> lines) {
-    clearRender();
-    for (var line in lines) {
-      _console.write(line);
-      _console.write(_console.newLine);
+    _restoreCursorPosition();
+    lines.forEachIndexed((index, line) {
+      if (!_currentRender.asMap().containsKey(index) ||
+          _currentRender[index] != line) {
+        _console.eraseLine();
+        stdout.write(line);
+        stdout.write(_console.newLine);
+      } else {
+        _console.cursorDown();
+      }
+    });
+    for (var i = lines.length; i < _currentRender.length; i++) {
+      _console.eraseLine();
+      _console.cursorDown();
     }
     _currentRender = lines;
   }
