@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dart_console/dart_console.dart';
 
 final _console = Console();
@@ -7,13 +9,25 @@ class ConsoleTools {
   List<String> _currentRender = [];
   int get _currentRenderLineCount => _currentRender.length;
 
+  ConsoleTools() {
+    _saveCursorPosition();
+  }
+
+  void _saveCursorPosition() {
+    stdout.write('\x1b[s');
+  }
+
+  void _restoreCursorPosition() {
+    stdout.write('\x1b[u');
+  }
+
   void clearRender() {
-    _console.cursorPosition = _cursorOrigin;
+    _restoreCursorPosition();
     for (var i = 0; i < _currentRenderLineCount; i++) {
       _console.eraseLine();
       _console.cursorDown();
     }
-    _console.cursorPosition = _cursorOrigin;
+    _restoreCursorPosition();
     _currentRender = [];
   }
 
