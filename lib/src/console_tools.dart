@@ -1,58 +1,67 @@
 import 'dart:io';
 
 import 'package:dart_console/dart_console.dart';
-import 'package:collection/collection.dart';
-
-final _console = Console();
+import 'package:interactive_cli/src/cursor_position.dart';
 
 class ConsoleTools {
-  final Coordinate _cursorOrigin = _console.cursorPosition!;
-  List<String> _currentRender = [];
+  final Console _console = Console();
+  int get columns => stdout.terminalColumns;
+  int get rows => stdout.terminalLines;
+
+  int currentRow = 0;
 
   ConsoleTools() {
-    _saveCursorPosition();
+    moveCursorToColumn(0);
   }
 
-  void _saveCursorPosition() {
-    stdout.write('\x1b[s');
+  void resetCursor() {
+    moveCursorToRow(0);
+    moveCursorToColumn(0);
   }
 
-  void _restoreCursorPosition() {
-    stdout.write('\x1b[u');
+  void setCursorPosition(CursorPosition position) {
+    moveCursorToRow(position.row);
+    moveCursorToColumn(position.col);
   }
 
-  void clearRender() {
-    _restoreCursorPosition();
-    for (var line in _currentRender) {
-      _console.eraseLine();
-      _console.cursorDown();
+  void moveCursorDown({int count = 1}) {
+    for (var i = 0; i < count; i++) {
+      _console.write(_console.newLine);
+      currentRow++;
     }
-    _restoreCursorPosition();
-    _currentRender = [];
   }
 
-  void hideCursor() => _console.hideCursor();
+  void moveCursorUp({int count = 1}) {
+    for (var i = 0; i < count; i++) {
+      _console.cursorUp();
+      currentRow--;
+    }
+  }
+
+  void moveCursorToRow(int row) {
+    final diff = row - currentRow;
+    if (diff > 0) {
+      moveCursorDown(count: diff);
+    } else if (diff < 0) {
+      moveCursorUp(count: diff.abs());
+    }
+  }
+
+  void moveCursorToColumn(int column) => stdout.write('\x1b[${column + 1}G');
+
+  void moveCursorRight({int count = 1}) => stdout.write('\x1b[${count}C');
+
+  void moveCursorLeft({int count = 1}) => stdout.write('\x1b[${count}D');
+
+  void write(String text) => _console.write(text);
+
+  void eraseLine() => _console.eraseLine();
 
   void showCursor() => _console.showCursor();
 
-  void render(List<String> lines) {
-    _restoreCursorPosition();
-    lines.forEachIndexed((index, line) {
-      if (!_currentRender.asMap().containsKey(index) ||
-          _currentRender[index] != line) {
-        _console.eraseLine();
-        stdout.write(line);
-        stdout.write(_console.newLine);
-      } else {
-        _console.cursorDown();
-      }
-    });
-    for (var i = lines.length; i < _currentRender.length; i++) {
-      _console.eraseLine();
-      _console.cursorDown();
-    }
-    _currentRender = lines;
-  }
+  void hideCursor() => _console.hideCursor();
+
+  void clearScreen() => _console.clearScreen();
 
   Key readKey() => _console.readKey();
 }

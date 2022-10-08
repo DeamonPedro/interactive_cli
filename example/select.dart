@@ -1,8 +1,7 @@
-import 'package:dart_console/src/key.dart';
 import 'package:interactive_cli/interactive_cli.dart';
 import 'package:collection/collection.dart';
 
-class Select extends ConsoleElement<int> {
+class Select extends InteractiveLines<int> {
   final List<String> options;
   int _selectedOption;
 
@@ -12,22 +11,24 @@ class Select extends ConsoleElement<int> {
   }) : _selectedOption = defaultOption;
 
   @override
-  void onInit(renderController) {
-    renderController.hideCursor();
+  void onInit() {
+    //context.hideCursor();
   }
 
   @override
-  void onFinish(renderController) {
-    renderController.showCursor();
+  void onFinish(res) {
+    print(res);
+    context.showCursor();
   }
 
   @override
-  List<String> render(renderController) {
-    return options.mapIndexed((index, option) {
+  List<String> render() {
+    context.setCursorPosition(column: 1, row: 1);
+    return options.mapIndexed((index, element) {
       if (index == _selectedOption) {
-        return '> $option';
+        return '> $element';
       } else {
-        return option;
+        return element;
       }
     }).toList();
   }
@@ -49,13 +50,11 @@ class Select extends ConsoleElement<int> {
   }
 
   @override
-  react(Key pressedKey, Function(int) finish, Function reload) {
+  react(Key pressedKey, Function(int value) finish) {
     if (pressedKey.controlChar == ControlCharacter.arrowUp) {
       _up();
-      reload();
     } else if (pressedKey.controlChar == ControlCharacter.arrowDown) {
       _down();
-      reload();
     } else if (pressedKey.controlChar == ControlCharacter.enter) {
       finish(_selectedOption);
     }
