@@ -48,7 +48,6 @@ class Context {
 
   void render(List<String> lines) {
     _console.hideCursor();
-    _console.resetCursor();
     final diff = linesDiff(_currentRender, lines);
     diff.forEach((index, line) {
       _console.moveCursorToRow(index);
