@@ -7,6 +7,7 @@ class Context {
   final ConsoleTools _console = ConsoleTools();
   CursorPosition _cursorPosition = CursorPosition(0, 0);
   List<String> _currentRender = [];
+  bool cursorVisible = true;
 
   CursorPosition getCursorPosition() => _cursorPosition;
 
@@ -25,9 +26,15 @@ class Context {
 
   void moveCursorLeft({int count = 1}) => _console.moveCursorLeft(count: count);
 
-  void hideCursor() => _console.hideCursor();
+  void hideCursor() {
+    _console.hideCursor();
+    cursorVisible = false;
+  }
 
-  void showCursor() => _console.showCursor();
+  void showCursor() {
+    _console.showCursor();
+    cursorVisible = true;
+  }
 
   void clearRender() {
     _console.resetCursor();
@@ -40,6 +47,7 @@ class Context {
   }
 
   void render(List<String> lines) {
+    _console.hideCursor();
     _console.resetCursor();
     final diff = linesDiff(_currentRender, lines);
     diff.forEach((index, line) {
@@ -50,6 +58,9 @@ class Context {
     });
     _currentRender = lines;
     _console.setCursorPosition(_cursorPosition);
+    if (cursorVisible) {
+      _console.showCursor();
+    }
   }
 
   Key readKey() => _console.readKey();

@@ -1,13 +1,13 @@
 import 'package:interactive_cli/src/context.dart';
 import 'package:dart_console/dart_console.dart';
 
-abstract class InteractiveLines<T> {
+abstract class InteractiveLines<T extends Object> {
   final context = Context();
   renderLines() => context.render(render());
   T? _return;
 
   void onInit() {}
-  void onFinish(T) {}
+  void onFinish(T res) {}
 
   List<String> render();
 
@@ -28,7 +28,7 @@ abstract class InteractiveLines<T> {
       );
       if (_return != null) {
         context.clearRender();
-        onFinish(_return!);
+        onFinish(_return as T);
         return _return!;
       } else {
         renderLines();
